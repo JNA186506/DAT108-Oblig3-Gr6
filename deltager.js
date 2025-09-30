@@ -55,27 +55,26 @@ class DeltagerManager {
     }
 
     validateForm() {
-        const doesDeltagerExist = !this.deltagerTabell.some(deltager => deltager.startnummer === this.startnummer.value);
+        const doesDeltagerExist = this.deltagerTabell.some(deltager => deltager.startnummer === this.startnummer.value);
+        const isValidStartnummer = this.startnummer.validity///^\d+$/.test(startNummerValue);
 
-        const navnValue = this.navn.value.trim();
-        const startNummerValue = this.startnummer.value.trim();
-
-        const isValidStartnummer = /^\d+$/.test(startNummerValue);
-        const isValidNavn = /^\p{L}+$/u.test(navnValue);
-
-        this.startnummer.classList.toggle("input:invalid", (!isValidStartnummer || !doesDeltagerExist));
-        this.navn.classList.toggle("input:invalid", !isValidNavn);
-
-        const isValid = isValidStartnummer && isValidNavn && doesDeltagerExist;
-        if (!isValid) console.log("Invalid input");
-
-        return isValid;
+        if (doesDeltagerExist) {
+            this.startnummer.setCustomValidity("Deltager finnes allerede!");
+            console.log("Deltager finnes allerede!");
+            return false;
+        } else if (isValidStartnummer.badInput) {
+            this.startnummer.setCustomValidity("Legg inn et ekte tall");
+            console.log("Bruk heltall!")
+            return false;
+        } else {
+            this.startnummer.setCustomValidity("");
+            return true;
+        }
     }
 }
 
 
 const root = document.getElementById("root");
-const input = root.querySelector("input");
 const btn = root.querySelector("#btn")
 
 const deltagerManager = new DeltagerManager(root);
