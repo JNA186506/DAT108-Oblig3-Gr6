@@ -49,6 +49,7 @@ class DeltagerManager {
             this.tdbody.classList.remove("hidden");
 
             this.navn.value = "";
+            this.startnummer.value = "";
             this.deltagerTabell.push(deltager);
             console.log(this.deltagerTabell.toString());
         }
