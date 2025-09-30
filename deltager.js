@@ -30,11 +30,12 @@ class DeltagerManager {
     }
 
     leggTilDeltagerITabell() {
-
+		var re = /(\b[a-z](?!\s))/g;
+		var navnUt = this.navn.value.replace(re, function(x){return x.toUpperCase();});
         if(this.validateForm()) {
             const deltager = new Deltager(
                 this.startnummer.value,
-                this.navn.value,
+                navnUt,
                 this.sluttid.value
             );
 
