@@ -30,9 +30,9 @@ class DeltagerManager {
     }
 
     leggTilDeltagerITabell() {
-		var re = /\b([a-zæøå])([a-zæøå]*)/gi;
+		var re = /([a-zæøå])([a-zæøå]*)/gi;
 		var navnUt = this.navn.value;
-		navnUt = navnUt.replace(/\b([a-zæøå])([a-zæøå]*)/gi, function(match, first, rest) {
+		navnUt = navnUt.replace(re, function(match, first, rest) {
 			return first.toUpperCase() + rest.toLowerCase();
 		});
         if(this.validateForm()) {
