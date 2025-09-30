@@ -41,8 +41,8 @@ class DeltagerManager {
             const row = document.createElement("tr");
             row.innerHTML = `
             <td></td>
-            <td>${deltager.navn}</td>
             <td>${deltager.startnummer}</td>
+            <td>${deltager.navn}</td>
             <td>${deltager.sluttid}</td>
             `;
             this.tdbody.appendChild(row);
@@ -62,10 +62,12 @@ class DeltagerManager {
         if (doesDeltagerExist) {
             this.startnummer.setCustomValidity("Deltager finnes allerede!");
             console.log("Deltager finnes allerede!");
+            this.startnummer.reportValidity();
             return false;
         } else if (isValidStartnummer.badInput) {
             this.startnummer.setCustomValidity("Legg inn et ekte tall");
             console.log("Bruk heltall!")
+            this.startnummer.reportValidity();
             return false;
         } else {
             this.startnummer.setCustomValidity("");
