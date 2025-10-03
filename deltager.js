@@ -10,6 +10,17 @@ class Deltager {
         this.navn = navn;
         this.sluttid = sluttid;
     }
+
+	getSluttidSekunder() {
+	        let parts = this.sluttid.split(":").map(Number);
+	        if (parts.length === 2) {
+	            return parts[0] * 60 + parts[1];   
+	        } else if (parts.length === 3) {
+	            return parts[0] * 3600 + parts[1] * 60 + parts[2]; 
+			} else {
+	            return 0;
+	       }
+	 }
 }
 
 class DeltagerManager {
@@ -78,12 +89,57 @@ class DeltagerManager {
             return true;
         }
     }
+	
+	visResultat(fraTid="", tilTid=""){
+		this.tdbody.innerHTML ="";
+		
+		const fra = fraTid ? this._tidTilSekunder(fraTid) : null;
+		const til = tilTid ? this._tidTilSekunder(tilTid) : null;
+		
+		let sortert = [...this.deltagerTabell].sort(
+			(a, b) => a.getSluttidSekunder() - b.getSluttidSekunder()
+		);	
+		 
+		let filtrert = sortert.filter(d => {
+			const tid = d.getSluttidSekunder();
+			if (fra !== null && tid < fra) return false;
+			if (til !== null && tid > til) return false;
+			return true;
+		});
+		 
+		filtrert.forEach((d,i) => {
+			const row = document.createElement("tr");
+			row.innerHTML = `
+				<td>${i + 1}</td>
+				<td>${d.startnummer}</td>
+				<td>${d.navn}</td>
+				<td>${d.sluttid}</td>
+				`;
+				this.tdbody.appendChild(row);
+		}); 
+		 
+	}
+
+	_tidTilSekunder(tid) {
+	        let parts = tid.split(":").map(Number);
+	        if (parts.length === 2) {
+	            return parts[0] * 60 + parts[1];
+	        } else if (parts.length === 3) {
+	            return parts[0] * 3600 + parts[1] * 60 + parts[2];
+	        } else {
+	            return 0;
+	        }
+	    }
 }
 
 
 const root = document.getElementById("root");
 const btn = root.querySelector("#btn")
+const visbtn = root.querySelector("#visbtn")
+const fraInput = root.querySelector("#nedregrense");
+const tilInput = root.querySelector("#ovregrense");
 
 const deltagerManager = new DeltagerManager(root);
 
 btn.addEventListener("click", () => deltagerManager.leggTilDeltagerITabell());
+visbtn.addEventListener("click", () => deltagerManager.visResultat(fraInput.value, tilInput.value));
