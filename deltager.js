@@ -28,7 +28,7 @@ class DeltagerManager {
     startnummer;
     navn;
     sluttid;
-    tdbody;
+    tbody;
     deltagerTabell;
 
     constructor(root) {
@@ -36,13 +36,13 @@ class DeltagerManager {
         this.startnummer = root.querySelector("#startnummer");
         this.navn = root.querySelector("#deltagernavn");
         this.sluttid = root.querySelector("#sluttid");
-        this.tdbody = root.querySelector("#entries");
+        this.tbody = root.querySelector("#entries");
         this.deltagerTabell = [];
     }
 
     leggTilDeltagerITabell() {
-		var re = /([a-zæøå])([a-zæøå]*)/gi;
-		var navnUt = this.navn.value;
+		const re = /([a-zæøå])([a-zæøå]*)/gi;
+		let navnUt = this.navn.value;
 		navnUt = navnUt.replace(re, function(match, first, rest) {
 			return first.toUpperCase() + rest.toLowerCase();
 		});
@@ -53,20 +53,14 @@ class DeltagerManager {
                 this.sluttid.value
             );
 
-            const row = document.createElement("tr");
-            row.innerHTML = `
-            <td></td>
-            <td>${deltager.startnummer}</td>
-            <td>${deltager.navn}</td>
-            <td>${deltager.sluttid}</td>
-            `;
-            this.tdbody.appendChild(row);
-            this.tdbody.classList.remove("hidden");
-
             this.navn.value = "";
             this.startnummer.value = "";
+
             this.deltagerTabell.push(deltager);
-            console.log(this.deltagerTabell.toString());
+            this.tegnTabell(this.deltagerTabell);
+            console.log(this.deltagerTabell);
+
+            this.startnummer.focus();
         }
     }
 
@@ -89,9 +83,45 @@ class DeltagerManager {
             return true;
         }
     }
+
+    tegnTabell(tabell) {
+        this.tbody.innerHTML = "";
+
+        /* En mer effektiv måte å sette inn på er ved å finne posisjon
+        * ved bruk av binærsøk. Siden datasettet er såpass lite, så sorterer vi hver
+        * gang. */
+        tabell.sort((a, b) => a.sluttid > b.sluttid);
+
+        tabell.forEach(((deltager, i) => {
+            const row = document.createElement("tr");
+
+            const indexCell = document.createElement("td");
+            indexCell.textContent = i + 1;
+
+            const navnCell = document.createElement("td");
+            navnCell.textContent = deltager.navn;
+
+            const startnummerCell = document.createElement("td");
+            startnummerCell.textContent = deltager.startnummer;
+
+            const sluttidCell = document.createElement("td");
+            sluttidCell.textContent = deltager.sluttid;
+
+            row.appendChild(indexCell);
+            row.appendChild(navnCell);
+            row.appendChild(startnummerCell);
+            row.appendChild(sluttidCell);
+
+            this.tbody.appendChild(row);
+        }));
+
+        this.tbody.classList.remove("hidden");
+        document.getElementById("ingenRes").textContent = "";
+
+    }
 	
 	visResultat(fraTid="", tilTid=""){
-		this.tdbody.innerHTML ="";
+		this.tbody.innerHTML ="";
 		
 		const fra = fraTid ? this._tidTilSekunder(fraTid) : null;
 		const til = tilTid ? this._tidTilSekunder(tilTid) : null;
@@ -100,24 +130,9 @@ class DeltagerManager {
 			(a, b) => a.getSluttidSekunder() - b.getSluttidSekunder()
 		);	
 		 
-		let filtrert = sortert.filter(d => {
-			const tid = d.getSluttidSekunder();
-			if (fra !== null && tid < fra) return false;
-			if (til !== null && tid > til) return false;
-			return true;
-		});
-		 
-		filtrert.forEach((d,i) => {
-			const row = document.createElement("tr");
-			row.innerHTML = `
-				<td>${i + 1}</td>
-				<td>${d.startnummer}</td>
-				<td>${d.navn}</td>
-				<td>${d.sluttid}</td>
-				`;
-				this.tdbody.appendChild(row);
-		}); 
-		 
+		const filtrert = sortert.filter(d => d.sluttid < fra && d.sluttid > til);
+
+        this.tegnTabell(filtrert);
 	}
 
 	_tidTilSekunder(tid) {
