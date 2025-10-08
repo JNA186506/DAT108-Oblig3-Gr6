@@ -43,12 +43,13 @@ class DeltagerManager {
     }
 
     leggTilDeltagerITabell() {
-		const re = /([a-zæøå])([a-zæøå]*)/gi;
-		let navnUt = this.navn.value;
-		navnUt = navnUt.replace(re, function(match, first, rest) {
-			return first.toUpperCase() + rest.toLowerCase();
-		});
         if(this.validateForm()) {
+            const navnStoreBokstaver = /([a-zæøå])([a-zæøå]*)/gi;
+
+            let navnUt = this.navn.value.trim().
+                replace(navnStoreBokstaver, (match, first, rest) =>
+                    first.toUpperCase() + rest.toLowerCase());
+
             const deltager = new Deltager(
                 this.startnummer.value,
                 navnUt,
@@ -68,8 +69,18 @@ class DeltagerManager {
 
     validateForm() {
         const doesDeltagerExist = this.deltagerTabell.some(deltager => deltager.startnummer === this.startnummer.value);
-        const isValidStartnummer = this.startnummer.validity///^\d+$/.test(startNummerValue);
+        const isValidStartnummer = this.startnummer.validity;
+        const navnRegex = /^[A-Za-zÆØÅæøå\s-]+$/;
 
+        let navnUt = this.navn.value.trim();
+
+        if (!navnRegex.test(navnUt)) {
+            this.navn.setCustomValidity("Navn kan kun inneholde bokstaver, mellomrom og bindestrek");
+            this.navn.reportValidity();
+            return false;
+        }
+
+        this.navn.setCustomValidity("");
         if (doesDeltagerExist) {
             this.startnummer.setCustomValidity("Deltager finnes allerede!");
             console.log("Deltager finnes allerede!");
@@ -122,7 +133,6 @@ class DeltagerManager {
     }
 	
 	visResultat(){
-		this.tbody.innerHTML ="";
         this.fraInput.setCustomValidity("");
 
         const fraTid = this.fraInput.value;
@@ -136,6 +146,8 @@ class DeltagerManager {
             this.fraInput.focus();
             return;
         }
+
+        this.tbody.innerHTML ="";
 
         const filtrert = this.deltagerTabell.filter(
             deltager => deltager.getSluttidSekunder() >= fra && deltager.getSluttidSekunder() <= til);
