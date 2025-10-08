@@ -37,6 +37,8 @@ class DeltagerManager {
         this.navn = root.querySelector("#deltagernavn");
         this.sluttid = root.querySelector("#sluttid");
         this.tbody = root.querySelector("#entries");
+        this.fraInput = root.querySelector("#nedregrense");
+        this.tilInput = root.querySelector("#ovregrense");
         this.deltagerTabell = [];
     }
 
@@ -90,7 +92,7 @@ class DeltagerManager {
         /* En mer effektiv måte å sette inn på er ved å finne posisjon
         * ved bruk av binærsøk. Siden datasettet er såpass lite, så sorterer vi hver
         * gang. */
-        tabell.sort((a, b) => a.sluttid > b.sluttid);
+        tabell.sort((a, b) => a.getSluttidSekunder() > b.getSluttidSekunder());
 
         tabell.forEach(((deltager, i) => {
             const row = document.createElement("tr");
@@ -117,20 +119,26 @@ class DeltagerManager {
 
         this.tbody.classList.remove("hidden");
         document.getElementById("ingenRes").textContent = "";
-
     }
 	
-	visResultat(fraTid="", tilTid=""){
+	visResultat(){
 		this.tbody.innerHTML ="";
-		
+        this.fraInput.setCustomValidity("");
+
+        const fraTid = this.fraInput.value;
+        const tilTid = this.tilInput.value;
 		const fra = fraTid ? this._tidTilSekunder(fraTid) : null;
 		const til = tilTid ? this._tidTilSekunder(tilTid) : null;
-		
-		let sortert = [...this.deltagerTabell].sort(
-			(a, b) => a.getSluttidSekunder() - b.getSluttidSekunder()
-		);	
-		 
-		const filtrert = sortert.filter(d => d.sluttid < fra && d.sluttid > til);
+
+        if (fra > til) {
+            this.fraInput.setCustomValidity("Fra kan ikke være større en til");
+            this.fraInput.reportValidity();
+            this.fraInput.focus();
+            return;
+        }
+
+        const filtrert = this.deltagerTabell.filter(
+            deltager => deltager.getSluttidSekunder() >= fra && deltager.getSluttidSekunder() <= til);
 
         this.tegnTabell(filtrert);
 	}
@@ -151,10 +159,8 @@ class DeltagerManager {
 const root = document.getElementById("root");
 const btn = root.querySelector("#btn")
 const visbtn = root.querySelector("#visbtn")
-const fraInput = root.querySelector("#nedregrense");
-const tilInput = root.querySelector("#ovregrense");
 
 const deltagerManager = new DeltagerManager(root);
 
 btn.addEventListener("click", () => deltagerManager.leggTilDeltagerITabell());
-visbtn.addEventListener("click", () => deltagerManager.visResultat(fraInput.value, tilInput.value));
+visbtn.addEventListener("click", () => deltagerManager.visResultat());
