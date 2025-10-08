@@ -56,12 +56,13 @@ class DeltagerManager {
                 this.sluttid.value
             );
 
-            this.navn.value = "";
             this.startnummer.value = "";
+            this.navn.value = "";
+            this.sluttid.value = "";
+
 
             this.deltagerTabell.push(deltager);
             this.tegnTabell(this.deltagerTabell);
-            console.log(this.deltagerTabell);
 
             this.startnummer.focus();
         }
@@ -70,11 +71,11 @@ class DeltagerManager {
     validateForm() {
         const doesDeltagerExist = this.deltagerTabell.some(deltager => deltager.startnummer === this.startnummer.value);
         const isValidStartnummer = this.startnummer.validity;
-        const navnRegex = /^[A-Za-zÆØÅæøå\s-]+$/;
-
+        const navnRegex = /^[A-Za-zÆØÅæøå]{2,}((\s+|-)[A-Za-zÆØÅæøå]{2,})*$/;
         let navnUt = this.navn.value.trim();
+        const isValidNavn = navnRegex.test(navnUt);
 
-        if (!navnRegex.test(navnUt)) {
+        if (!isValidNavn)  {
             this.navn.setCustomValidity("Navn kan kun inneholde bokstaver, mellomrom og bindestrek");
             this.navn.reportValidity();
             return false;
@@ -83,12 +84,10 @@ class DeltagerManager {
         this.navn.setCustomValidity("");
         if (doesDeltagerExist) {
             this.startnummer.setCustomValidity("Deltager finnes allerede!");
-            console.log("Deltager finnes allerede!");
             this.startnummer.reportValidity();
             return false;
         } else if (isValidStartnummer.badInput) {
             this.startnummer.setCustomValidity("Legg inn et ekte tall");
-            console.log("Bruk heltall!")
             this.startnummer.reportValidity();
             return false;
         } else {
