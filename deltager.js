@@ -102,7 +102,7 @@ class DeltagerManager {
         /* En mer effektiv måte å sette inn på er ved å finne posisjon
         * ved bruk av binærsøk. Siden datasettet er såpass lite, så sorterer vi hver
         * gang. */
-        tabell.sort((a, b) => a.getSluttidSekunder() > b.getSluttidSekunder());
+        tabell.sort((a, b) => a.getSluttidSekunder() - b.getSluttidSekunder());
 
         tabell.forEach(((deltager, i) => {
             const row = document.createElement("tr");
@@ -140,9 +140,9 @@ class DeltagerManager {
 		const til = tilTid ? this._tidTilSekunder(tilTid) : null;
 
         if (fra > til) {
-            this.fraInput.setCustomValidity("Fra kan ikke være større en til");
-            this.fraInput.reportValidity();
-            this.fraInput.focus();
+            this.tilInput.setCustomValidity("Fra kan ikke være større en til");
+            this.tilInput.reportValidity();
+            this.tilInput.focus();
             return;
         }
 
