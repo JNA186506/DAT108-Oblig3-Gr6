@@ -55,7 +55,13 @@ class DeltagerManager {
                 navnUt,
                 this.sluttid.value
             );
-
+			
+			const feedback = root.getElementsByTagName("p")[0];
+			feedback.getElementsByTagName("span")[0].textContent = navnUt;
+			feedback.getElementsByTagName("span")[1].textContent = this.startnummer.value;
+			feedback.getElementsByTagName("span")[2].textContent = this.sluttid.value;
+			feedback.style.display = "block";
+			
             this.startnummer.value = "";
             this.navn.value = "";
             this.sluttid.value = "";
@@ -97,38 +103,44 @@ class DeltagerManager {
     }
 
     tegnTabell(tabell) {
-        this.tbody.innerHTML = "";
-
-        /* En mer effektiv måte å sette inn på er ved å finne posisjon
-        * ved bruk av binærsøk. Siden datasettet er såpass lite, så sorterer vi hver
-        * gang. */
-        tabell.sort((a, b) => a.getSluttidSekunder() - b.getSluttidSekunder());
-
-        tabell.forEach(((deltager, i) => {
-            const row = document.createElement("tr");
-
-            const indexCell = document.createElement("td");
-            indexCell.textContent = i + 1;
-
-            const navnCell = document.createElement("td");
-            navnCell.textContent = deltager.navn;
-
-            const startnummerCell = document.createElement("td");
-            startnummerCell.textContent = deltager.startnummer;
-
-            const sluttidCell = document.createElement("td");
-            sluttidCell.textContent = deltager.sluttid;
-
-            row.appendChild(indexCell);
-            row.appendChild(navnCell);
-            row.appendChild(startnummerCell);
-            row.appendChild(sluttidCell);
-
-            this.tbody.appendChild(row);
-        }));
-
-        this.tbody.classList.remove("hidden");
-        document.getElementById("ingenRes").textContent = "";
+        if(tabell && tabell.length){
+			this.tbody.innerHTML = "";
+	
+	        /* En mer effektiv måte å sette inn på er ved å finne posisjon
+	        * ved bruk av binærsøk. Siden datasettet er såpass lite, så sorterer vi hver
+	        * gang. */
+	        tabell.sort((a, b) => a.getSluttidSekunder() - b.getSluttidSekunder());
+	
+	        tabell.forEach(((deltager, i) => {
+	            const row = document.createElement("tr");
+	
+	            const indexCell = document.createElement("td");
+	            indexCell.textContent = i + 1;
+	
+	            const navnCell = document.createElement("td");
+	            navnCell.textContent = deltager.navn;
+	
+	            const startnummerCell = document.createElement("td");
+	            startnummerCell.textContent = deltager.startnummer;
+	
+	            const sluttidCell = document.createElement("td");
+	            sluttidCell.textContent = deltager.sluttid;
+	
+	            row.appendChild(indexCell);
+	            row.appendChild(navnCell);
+	            row.appendChild(startnummerCell);
+	            row.appendChild(sluttidCell);
+	
+	            this.tbody.appendChild(row);
+	        }));
+	
+	        this.tbody.classList.remove("hidden");
+	        document.getElementById("ingenRes").style.visibility = "hidden";
+		}
+		else{
+			document.getElementById("ingenRes").style.visibility = "visible";
+		}
+		
     }
 	
 	visResultat(){
@@ -136,8 +148,8 @@ class DeltagerManager {
 
         const fraTid = this.fraInput.value;
         const tilTid = this.tilInput.value;
-		const fra = fraTid ? this._tidTilSekunder(fraTid) : null;
-		const til = tilTid ? this._tidTilSekunder(tilTid) : null;
+		const fra = fraTid ? this._tidTilSekunder(fraTid) : this._tidTilSekunder("00:00:00");
+		const til = tilTid ? this._tidTilSekunder(tilTid) : this._tidTilSekunder("23:59:59");
 
         if (fra > til) {
             this.tilInput.setCustomValidity("Fra kan ikke være større en til");
