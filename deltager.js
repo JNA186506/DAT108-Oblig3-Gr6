@@ -80,13 +80,22 @@ class DeltagerManager {
         const navnRegex = /^[A-Za-zÆØÅæøå]{2,}((\s+|-)[A-Za-zÆØÅæøå]{2,})*$/;
         let navnUt = this.navn.value.trim();
         const isValidNavn = navnRegex.test(navnUt);
-
+		const tidRegex = /^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][1-9])$/;
+		let tidUt = this.sluttid.value;
+		const isValidTid = tidRegex.test(tidUt);
+		
         if (!isValidNavn)  {
-            this.navn.setCustomValidity("Navn kan kun inneholde bokstaver, mellomrom og bindestrek");
+			this.navn.setCustomValidity("Navn kan kun inneholde bokstaver, mellomrom og bindestrek");
             this.navn.reportValidity();
             return false;
         }
-
+		
+		if(!isValidTid) {
+			this.sluttid.setCustomValidity("Format hh:mm:ss");
+			this.sluttid.reportValidity();
+			return false;
+		}
+		
         this.navn.setCustomValidity("");
         if (doesDeltagerExist) {
             this.startnummer.setCustomValidity("Deltager finnes allerede!");
