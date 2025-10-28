@@ -30,6 +30,7 @@ class DeltagerManager {
     sluttid;
     tbody;
     deltagerTabell;
+    plassering;
 
     constructor(root) {
         this.root = root;
@@ -68,6 +69,8 @@ class DeltagerManager {
 
 
             this.deltagerTabell.push(deltager);
+            this.deltagerTabell.sort((a, b) => a.getSluttidSekunder() - b.getSluttidSekunder())
+                .forEach((d, i) => d.plassering = i + 1);
             this.tegnTabell(this.deltagerTabell);
 
             this.startnummer.focus();
@@ -80,9 +83,10 @@ class DeltagerManager {
         const navnRegex = /^[A-Za-zÆØÅæøå]{2,}((\s+|-)[A-Za-zÆØÅæøå]{2,})*$/;
         let navnUt = this.navn.value.trim();
         const isValidNavn = navnRegex.test(navnUt);
-		const tidRegex = /^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][1-9])$/;
+		const tidRegex = /^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/;
 		let tidUt = this.sluttid.value;
 		const isValidTid = tidRegex.test(tidUt);
+        const tidUtIkke0 = tidUt !== "00:00:00";
 		
         if (!isValidNavn)  {
 			this.navn.setCustomValidity("Navn kan kun inneholde bokstaver, mellomrom og bindestrek");
@@ -90,8 +94,8 @@ class DeltagerManager {
             return false;
         }
 		
-		if(!isValidTid) {
-			this.sluttid.setCustomValidity("Format hh:mm:ss");
+		if(!isValidTid || !tidUtIkke0) {
+			this.sluttid.setCustomValidity("Format hh:mm:ss, tid kan ikke være 00:00:00");
 			this.sluttid.reportValidity();
 			return false;
 		}
@@ -114,17 +118,12 @@ class DeltagerManager {
     tegnTabell(tabell) {
         if(tabell && tabell.length){
 			this.tbody.innerHTML = "";
-	
-	        /* En mer effektiv måte å sette inn på er ved å finne posisjon
-	        * ved bruk av binærsøk. Siden datasettet er såpass lite, så sorterer vi hver
-	        * gang. */
-	        tabell.sort((a, b) => a.getSluttidSekunder() - b.getSluttidSekunder());
-	
-	        tabell.forEach(((deltager, i) => {
+
+	        tabell.forEach(((deltager) => {
 	            const row = document.createElement("tr");
 	
 	            const indexCell = document.createElement("td");
-	            indexCell.textContent = i + 1;
+	            indexCell.textContent = deltager.plassering;
 	
 	            const navnCell = document.createElement("td");
 	            navnCell.textContent = deltager.navn;
@@ -170,7 +169,8 @@ class DeltagerManager {
         this.tbody.innerHTML ="";
 
         const filtrert = this.deltagerTabell.filter(
-            deltager => deltager.getSluttidSekunder() >= fra && deltager.getSluttidSekunder() <= til);
+            deltager => deltager.getSluttidSekunder() >= fra && deltager.getSluttidSekunder() <= til)
+            .sort();
 
         this.tegnTabell(filtrert);
 	}
