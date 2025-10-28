@@ -87,6 +87,9 @@ class DeltagerManager {
 		let tidUt = this.sluttid.value;
 		const isValidTid = tidRegex.test(tidUt);
         const tidUtIkke0 = tidUt !== "00:00:00";
+
+		this.sluttid.setCustomValidity("");
+		this.navn.setCustomValidity("");
 		
         if (!isValidNavn)  {
 			this.navn.setCustomValidity("Navn kan kun inneholde bokstaver, mellomrom og bindestrek");
@@ -100,7 +103,6 @@ class DeltagerManager {
 			return false;
 		}
 		
-        this.navn.setCustomValidity("");
         if (doesDeltagerExist) {
             this.startnummer.setCustomValidity("Deltager finnes allerede!");
             this.startnummer.reportValidity();
